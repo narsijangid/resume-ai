@@ -2,41 +2,105 @@
 @tailwind components;
 @tailwind utilities;
 
-// @import url('https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 // import nuinto
 
 @layer base {
     body {
-        @apply bg-gray-800 text-gray-200 caret-primary-400;
-        font-family: 'Ubuntu', sans-serif;
+        @apply bg-gray-900 text-gray-100;
+        font-family: 'Inter', sans-serif;
     }
 }
 
 @layer components {
     .btn {
-        @apply flex cursor-pointer items-center justify-center gap-3 rounded-md border border-gray-600 bg-gray-700 px-6 py-1.5 font-medium shadow-lg shadow-gray-900/25 hover:brightness-125 2xl:text-lg;
-
-        &-filled {
-            @extend .btn;
-            @apply border-primary-500 bg-primary-400 text-gray-900;
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium transition-all duration-200;
+        
+        &-primary {
+            @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:scale-105;
+        }
+        
+        &-secondary {
+            @apply border border-gray-700 bg-gray-800 text-gray-200 shadow-sm hover:bg-gray-700;
         }
     }
 
     .card {
-        @apply rounded-md border border-gray-600 bg-gray-700/25 p-4 shadow-xl md:p-6 2xl:p-8;
+        @apply rounded-xl border border-gray-700 bg-gray-800/50 p-6 shadow-lg transition-all hover:shadow-xl;
     }
 }
 
 @layer utilities {
-    .gradient {
-        @apply bg-gradient-to-r from-primary-400 to-green-400;
+    .gradient-text {
+        @apply bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent;
     }
+    
+    .gradient-border {
+        @apply relative;
+        
+        &::before {
+            content: '';
+            @apply absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 p-[1px] -z-10;
+        }
+    }
+}
 
-    .text-gradient {
-        @extend .gradient;
-        @apply bg-clip-text text-transparent;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-gradient-to-b from-blue-500 to-purple-500;
+    
+    &:hover {
+        @apply from-blue-600 to-purple-600;
     }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-shine {
+    animation: shine 3s ease-in-out infinite;
+}
+
+/* Responsive Typography */
+h1 {
+    @apply text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl;
+}
+
+h2 {
+    @apply text-3xl font-semibold tracking-tight md:text-4xl;
+}
+
+h3 {
+    @apply text-2xl font-semibold md:text-3xl;
+}
+
+p {
+    @apply text-base leading-relaxed text-gray-300 md:text-lg;
 }
 
 .tabs {
@@ -44,23 +108,4 @@
         content: '';
         @apply absolute bottom-0 left-0 h-2 w-full;
     }
-}
-
-::-webkit-scrollbar {
-
-    @apply  md:size-1.5;
-
-    &-track {
-        @apply bg-gray-700 ;
-    }
-
-    &-thumb {
-        @apply bg-primary-500 rounded-sm;
-
-        &:hover{
-            @apply bg-primary-500;
-        }
-    }
-
-
 }

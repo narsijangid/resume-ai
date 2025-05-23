@@ -12,7 +12,10 @@ import { usePDF } from '@react-pdf/renderer';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { FaDownload, FaEye } from 'react-icons/fa6';
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+// Set up PDF worker
+if (typeof window !== 'undefined') {
+    pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+}
 
 const Loader = () => (
     <div className="flex min-h-96 w-full items-center justify-center">
@@ -55,17 +58,20 @@ const Preview = () => {
 
             {!instance.loading && (
                 <div className="mt-4 flex justify-around">
-                    <button onClick={() => preview(instance.url)} className="btn text-sm">
+                    <button 
+                        onClick={() => preview(instance.url)} 
+                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-blue-500 hover:bg-gray-800 hover:text-white"
+                    >
                         <span>Preview</span>
-                        <FaEye />
+                        <FaEye className="transition-transform group-hover:scale-110" />
                     </button>
                     <a
                         href={instance.url}
                         download={`${resumeData.contact?.name || 'resume'}.pdf`}
-                        className="btn text-sm"
+                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:bg-gray-800 hover:text-white"
                     >
                         <span>Download</span>
-                        <FaDownload />
+                        <FaDownload className="transition-transform group-hover:scale-110" />
                     </a>
                 </div>
             )}

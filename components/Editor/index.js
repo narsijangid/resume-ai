@@ -28,8 +28,12 @@ const Editor = ({ tab }) => {
                 {multiple && <MultiEditor tab={tab} />}
                 {!multiple && <SingleEditor tab={tab} />}
 
-                <button type="submit" className="btn-filled ml-auto mt-6 w-full gap-2 px-6 text-center md:w-auto">
-                    <span>Save</span> <FaSave />
+                <button 
+                    type="submit" 
+                    className="group ml-auto mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-green-500/30 bg-gradient-to-r from-green-500/10 to-emerald-500/10 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:from-green-500/20 hover:to-emerald-500/20 hover:text-white md:w-auto"
+                >
+                    <span>Save Changes</span>
+                    <FaSave className="transition-transform group-hover:scale-110" />
                 </button>
             </form>
         </>
