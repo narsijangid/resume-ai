@@ -47,24 +47,17 @@ const Preview = () => {
 
     const handleDownload = async () => {
         try {
-            // Get the PDF blob
-            const pdfBlob = await instance.blob;
-            
-            // Create a temporary URL for the blob
-            const url = URL.createObjectURL(pdfBlob);
-            
             // Create a temporary link element
             const link = document.createElement('a');
-            link.href = url;
+            link.href = instance.url;
             link.download = `${resumeData.contact?.name || 'resume'}.pdf`;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
             
             // Append to body, click and remove
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            // Clean up the URL
-            URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Error downloading PDF:', error);
         }
@@ -95,14 +88,17 @@ const Preview = () => {
                         <span>Preview</span>
                         <FaEye className="transition-transform group-hover:scale-110" />
                     </button>
-                    <button
-                        onClick={handleDownload}
+                    <a
+                        href={instance.url}
+                        download={`${resumeData.contact?.name || 'resume'}.pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         onContextMenu={handleContextMenu}
                         className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:bg-gray-800 hover:text-white"
                     >
                         <span>Download</span>
                         <FaDownload className="transition-transform group-hover:scale-110" />
-                    </button>
+                    </a>
                 </div>
             )}
         </div>
