@@ -4,13 +4,12 @@ import { useEffect, useRef, useState } from 'react';
 import Resume from './pdf';
 import { useSelector } from 'react-redux';
 import { CgSpinner } from 'react-icons/cg';
-
-// import 'react-pdf/dist/Page/AnnotationLayer.css';
-// import 'react-pdf/dist/Page/TextLayer.css';
-
 import { usePDF } from '@react-pdf/renderer';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { FaDownload, FaEye } from 'react-icons/fa6';
+
+// import 'react-pdf/dist/Page/AnnotationLayer.css';
+// import 'react-pdf/dist/Page/TextLayer.css';
 
 // Set up PDF worker
 if (typeof window !== 'undefined') {
@@ -36,31 +35,38 @@ const Preview = () => {
     const resumeData = useSelector(state => state.resume);
     const document = <Resume data={resumeData} />;
     const [instance, updateInstance] = usePDF({ document });
+    const [pdfUrl, setPdfUrl] = useState(null);
 
     useEffect(() => {
-        if (resumeData.saved) updateInstance(document);
+        if (resumeData.saved) {
+            updateInstance(document);
+        }
     }, [resumeData.saved]);
+
+    useEffect(() => {
+        const generatePdfUrl = async () => {
+            if (instance.blob) {
+                try {
+                    // Convert blob to base64
+                    const reader = new FileReader();
+                    reader.readAsDataURL(instance.blob);
+                    reader.onloadend = () => {
+                        const base64data = reader.result;
+                        setPdfUrl(base64data);
+                    };
+                } catch (error) {
+                    console.error('Error generating PDF URL:', error);
+                }
+            }
+        };
+
+        if (!instance.loading && instance.blob) {
+            generatePdfUrl();
+        }
+    }, [instance.blob, instance.loading]);
 
     const handleContextMenu = (e) => {
         e.preventDefault();
-    };
-
-    const handleDownload = async () => {
-        try {
-            // Create a temporary link element
-            const link = document.createElement('a');
-            link.href = instance.url;
-            link.download = `${resumeData.contact?.name || 'resume'}.pdf`;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            
-            // Append to body, click and remove
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } catch (error) {
-            console.error('Error downloading PDF:', error);
-        }
     };
 
     return (
@@ -89,7 +95,7 @@ const Preview = () => {
                         <FaEye className="transition-transform group-hover:scale-110" />
                     </button>
                     <a
-                        href={instance.url}
+                        href={pdfUrl}
                         download={`${resumeData.contact?.name || 'resume'}.pdf`}
                         target="_blank"
                         rel="noopener noreferrer"
