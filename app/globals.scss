@@ -10,12 +10,21 @@
     body {
         @apply bg-gray-900 text-gray-100;
         font-family: 'Inter', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
+    button, a {
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
     }
 }
 
 @layer components {
     .btn {
         @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3 font-medium transition-all duration-200;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
         
         &-primary {
             @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:scale-105;
