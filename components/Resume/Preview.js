@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import Resume from './pdf';
 import { useSelector } from 'react-redux';
 import { CgSpinner } from 'react-icons/cg';
-import { usePDF } from '@react-pdf/renderer';
-import { Document, Page, pdfjs } from 'react-pdf';
-import { FaDownload, FaEye } from 'react-icons/fa6';
 
 // import 'react-pdf/dist/Page/AnnotationLayer.css';
 // import 'react-pdf/dist/Page/TextLayer.css';
+
+import { usePDF } from '@react-pdf/renderer';
+import { Document, Page, pdfjs } from 'react-pdf';
+import { FaDownload, FaEye } from 'react-icons/fa6';
 
 // Set up PDF worker
 if (typeof window !== 'undefined') {
@@ -35,12 +36,9 @@ const Preview = () => {
     const resumeData = useSelector(state => state.resume);
     const document = <Resume data={resumeData} />;
     const [instance, updateInstance] = usePDF({ document });
-    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
-        if (resumeData.saved) {
-            updateInstance(document);
-        }
+        if (resumeData.saved) updateInstance(document);
     }, [resumeData.saved]);
 
     const handleContextMenu = (e) => {
@@ -49,37 +47,26 @@ const Preview = () => {
 
     const handleDownload = async () => {
         try {
-            setIsDownloading(true);
+            // Get the PDF blob
             const pdfBlob = await instance.blob;
-            const reader = new FileReader();
             
-            reader.onloadend = async () => {
-                const base64data = reader.result;
-                
-                // Create a form and submit it
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/api/download';
-                
-                // Add the PDF data
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'pdfData';
-                input.value = base64data;
-                form.appendChild(input);
-                
-                // Add the form to the document and submit it
-                document.body.appendChild(form);
-                form.submit();
-                document.body.removeChild(form);
-                
-                setIsDownloading(false);
-            };
+            // Create a temporary URL for the blob
+            const url = URL.createObjectURL(pdfBlob);
             
-            reader.readAsDataURL(pdfBlob);
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${resumeData.contact?.name || 'resume'}.pdf`;
+            
+            // Append to body, click and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the URL
+            URL.revokeObjectURL(url);
         } catch (error) {
             console.error('Error downloading PDF:', error);
-            setIsDownloading(false);
         }
     };
 
@@ -110,11 +97,10 @@ const Preview = () => {
                     </button>
                     <button
                         onClick={handleDownload}
-                        disabled={isDownloading}
                         onContextMenu={handleContextMenu}
-                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:bg-gray-800 hover:text-white disabled:opacity-50"
+                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:bg-gray-800 hover:text-white"
                     >
-                        <span>{isDownloading ? 'Downloading...' : 'Download'}</span>
+                        <span>Download</span>
                         <FaDownload className="transition-transform group-hover:scale-110" />
                     </button>
                 </div>
