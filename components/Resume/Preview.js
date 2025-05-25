@@ -35,7 +35,7 @@ const Preview = () => {
     const resumeData = useSelector(state => state.resume);
     const document = <Resume data={resumeData} />;
     const [instance, updateInstance] = usePDF({ document });
-    const [pdfUrl, setPdfUrl] = useState(null);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         if (resumeData.saved) {
@@ -43,30 +43,44 @@ const Preview = () => {
         }
     }, [resumeData.saved]);
 
-    useEffect(() => {
-        const generatePdfUrl = async () => {
-            if (instance.blob) {
-                try {
-                    // Convert blob to base64
-                    const reader = new FileReader();
-                    reader.readAsDataURL(instance.blob);
-                    reader.onloadend = () => {
-                        const base64data = reader.result;
-                        setPdfUrl(base64data);
-                    };
-                } catch (error) {
-                    console.error('Error generating PDF URL:', error);
-                }
-            }
-        };
-
-        if (!instance.loading && instance.blob) {
-            generatePdfUrl();
-        }
-    }, [instance.blob, instance.loading]);
-
     const handleContextMenu = (e) => {
         e.preventDefault();
+    };
+
+    const handleDownload = async () => {
+        try {
+            setIsDownloading(true);
+            const pdfBlob = await instance.blob;
+            const reader = new FileReader();
+            
+            reader.onloadend = async () => {
+                const base64data = reader.result;
+                
+                // Create a form and submit it
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/api/download';
+                
+                // Add the PDF data
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'pdfData';
+                input.value = base64data;
+                form.appendChild(input);
+                
+                // Add the form to the document and submit it
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+                
+                setIsDownloading(false);
+            };
+            
+            reader.readAsDataURL(pdfBlob);
+        } catch (error) {
+            console.error('Error downloading PDF:', error);
+            setIsDownloading(false);
+        }
     };
 
     return (
@@ -94,17 +108,15 @@ const Preview = () => {
                         <span>Preview</span>
                         <FaEye className="transition-transform group-hover:scale-110" />
                     </button>
-                    <a
-                        href={pdfUrl}
-                        download={`${resumeData.contact?.name || 'resume'}.pdf`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
+                        onClick={handleDownload}
+                        disabled={isDownloading}
                         onContextMenu={handleContextMenu}
-                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:bg-gray-800 hover:text-white"
+                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:bg-gray-800 hover:text-white disabled:opacity-50"
                     >
-                        <span>Download</span>
+                        <span>{isDownloading ? 'Downloading...' : 'Download'}</span>
                         <FaDownload className="transition-transform group-hover:scale-110" />
-                    </a>
+                    </button>
                 </div>
             )}
         </div>
