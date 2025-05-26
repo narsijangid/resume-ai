@@ -12,10 +12,7 @@ import { usePDF } from '@react-pdf/renderer';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { FaDownload, FaEye } from 'react-icons/fa6';
 
-// Set up PDF worker
-if (typeof window !== 'undefined') {
-    pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
-}
+pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
 
 const Loader = () => (
     <div className="flex min-h-96 w-full items-center justify-center">
@@ -41,35 +38,6 @@ const Preview = () => {
         if (resumeData.saved) updateInstance(document);
     }, [resumeData.saved]);
 
-    const handleContextMenu = (e) => {
-        e.preventDefault();
-    };
-
-    const handleDownload = async () => {
-        try {
-            // Get the PDF blob
-            const pdfBlob = await instance.blob;
-            
-            // Create a temporary URL for the blob
-            const url = URL.createObjectURL(pdfBlob);
-            
-            // Create a temporary link element
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${resumeData.contact?.name || 'resume'}.pdf`;
-            
-            // Append to body, click and remove
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            // Clean up the URL
-            URL.revokeObjectURL(url);
-        } catch (error) {
-            console.error('Error downloading PDF:', error);
-        }
-    };
-
     return (
         <div ref={parentRef} className="relative w-full md:max-w-[24rem] 2xl:max-w-[28rem]">
             {instance.loading ?
@@ -87,22 +55,18 @@ const Preview = () => {
 
             {!instance.loading && (
                 <div className="mt-4 flex justify-around">
-                    <button 
-                        onClick={() => preview(instance.url)} 
-                        onContextMenu={handleContextMenu}
-                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-blue-500 hover:bg-gray-800 hover:text-white"
-                    >
+                    <button onClick={() => preview(instance.url)} className="btn text-sm">
                         <span>Preview</span>
-                        <FaEye className="transition-transform group-hover:scale-110" />
+                        <FaEye />
                     </button>
-                    <button
-                        onClick={handleDownload}
-                        onContextMenu={handleContextMenu}
-                        className="group flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 px-4 py-2 text-sm font-medium text-gray-200 transition-all hover:border-green-500 hover:bg-gray-800 hover:text-white"
+                    <a
+                        href={instance.url}
+                        download={`${resumeData.contact?.name || 'resume'}.pdf`}
+                        className="btn text-sm"
                     >
                         <span>Download</span>
-                        <FaDownload className="transition-transform group-hover:scale-110" />
-                    </button>
+                        <FaDownload />
+                    </a>
                 </div>
             )}
         </div>
